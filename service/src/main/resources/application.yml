@@ -1,0 +1,17 @@
+server:
+  port: 8090
+
+pod:
+  id: ${POD_ID}
+
+kafka:
+  schema:
+    registry:
+      url: ${SCHEMA_REGISTRY_URL}
+  producer:
+    batch: ${KAFKA_PRODUCER_BATCH}
+  topic:
+    name: ${KAFKA_TOPIC_NAME}
+    partition: ${PARTITION}
+  bootstrap:
+    address: ${KAFKA_BOOTSTRAP_ADDRESS}

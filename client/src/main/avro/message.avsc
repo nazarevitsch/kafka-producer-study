@@ -1,0 +1,13 @@
+{
+     "type": "record",
+     "namespace": "com.kafka.study.producer.client.dto",
+     "name": "Message",
+     "version": "1",
+     "fields": [
+       { "name": "message", "type": "int", "doc": "Message." },
+       { "name": "producerId", "type": "int", "doc": "Id of the producer." },
+       { "name": "brand", "type": "string", "doc": "Brand." },
+       { "name": "state", "type": "string", "doc": "State." },
+       { "name": "price", "type": "int", "doc": "Price." }
+       ]
+}

@@ -1,0 +1,37 @@
+
+!!! FOR BITNAMI !!!
+
+kafka-topics.sh --describe --topic first-topic --bootstrap-server kafka:9092
+
+kafka-topics.sh --create --bootstrap-server kafka:9092 --replication-factor 1 --partitions 3 --topic first-topic
+
+kafka-topics.sh --list --bootstrap-server kafka:9092
+
+kafka-topics.sh --alter --bootstrap-server kafka:9092 --partitions 3 --topic first-topic
+
+kafka-console-producer.sh --bootstrap-server kafka:9092 --topic first-topic
+
+kafka-console-consumer.sh --topic first-topic --group some-group --bootstrap-server kafka:9092 --from-beginning
+--property print.partition=true
+
+
+kafka-consumer-groups.sh --bootstrap-server kafka:9092 --describe --group some-group
+
+kafka-consumer-groups.sh --bootstrap-server kafka:9092 --list
+
+
+    environment:
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_BROKER_ID=0
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_KRAFT_CLUSTER_ID=LelM2dIFQkiUFvXCEcqRWA
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      - ALLOW_PLAINTEXT_LISTENER=yes
+
+
+

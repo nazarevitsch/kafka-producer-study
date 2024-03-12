@@ -1,0 +1,128 @@
+version: '3.9'
+
+services:
+  database:
+    container_name: database-kafka
+    image: postgres:15.0
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: kafka_study
+      PGDATA: /data
+    ports:
+      - '5458:5432'
+    volumes:
+      - ./database_data:/data
+
+  schema-registry:
+    hostname: schema-registry
+    container_name: schema-registry-kafka
+    image: confluentinc/cp-schema-registry:latest
+    depends_on:
+      - kafka
+    networks:
+      - app-tier
+    ports:
+      - "8081:8081"
+    environment:
+      - SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS=PLAINTEXT://kafka:9092
+      - SCHEMA_REGISTRY_HOST_NAME=schema-registry
+      - SCHEMA_REGISTRY_LISTENERS=http://0.0.0.0:8081
+
+  kafka:
+    container_name: kafka
+    image: bitnami/kafka:latest
+    hostname: kafka
+    networks:
+      - app-tier
+    ports:
+      - '9094:9094'
+    environment:
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL=http://schema-registry:8081
+
+  server-consumer-1:
+    container_name: kafka-consumer-1
+    image: kafka-consumer:latest
+    networks:
+      - app-tier
+    environment:
+      - POD_ID=1
+      - DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5458/kafka_study
+      - DATASOURCE_USERNAME=postgres
+      - DATASOURCE_PASSWORD=postgres
+      - KAFKA_TOPIC_NAME=message-topic
+      - KAFKA_CONSUMER_GROUP_NAME=message-group
+      - KAFKA_BOOTSTRAP_ADDRESS=kafka:9092
+      - KAFKA_CONCURRENCY=5
+      - SCHEMA_REGISTRY_URL=http://schema-registry:8081
+
+  server-consumer-2:
+    container_name: kafka-consumer-2
+    image: kafka-consumer:latest
+    networks:
+      - app-tier
+    environment:
+      - POD_ID=2
+      - DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5458/kafka_study
+      - DATASOURCE_USERNAME=postgres
+      - DATASOURCE_PASSWORD=postgres
+      - KAFKA_TOPIC_NAME=message-topic
+      - KAFKA_CONSUMER_GROUP_NAME=message-group
+      - KAFKA_BOOTSTRAP_ADDRESS=kafka:9092
+      - KAFKA_CONCURRENCY=5
+      - SCHEMA_REGISTRY_URL=http://schema-registry:8081
+
+  server-consumer-3:
+    container_name: kafka-consumer-3
+    image: kafka-consumer:latest
+    networks:
+      - app-tier
+    environment:
+      - POD_ID=3
+      - DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5458/kafka_study
+      - DATASOURCE_USERNAME=postgres
+      - DATASOURCE_PASSWORD=postgres
+      - KAFKA_TOPIC_NAME=message-topic
+      - KAFKA_CONSUMER_GROUP_NAME=message-group
+      - KAFKA_BOOTSTRAP_ADDRESS=kafka:9092
+      - KAFKA_CONCURRENCY=5
+      - SCHEMA_REGISTRY_URL=http://schema-registry:8081
+
+  server-producer-1:
+    container_name: kafka-producer-1
+    image: kafka-producer:latest
+    networks:
+      - app-tier
+    ports:
+      - '8090:8090'
+    environment:
+      - POD_ID=1
+      - KAFKA_PRODUCER_BATCH=100
+      - KAFKA_TOPIC_NAME=message-topic
+      - KAFKA_BOOTSTRAP_ADDRESS=kafka:9092
+      - SCHEMA_REGISTRY_URL=http://schema-registry:8081
+
+  server-producer-2:
+    container_name: kafka-producer-2
+    image: kafka-producer:latest
+    networks:
+      - app-tier
+    ports:
+      - '8091:8090'
+    environment:
+      - POD_ID=2
+      - KAFKA_PRODUCER_BATCH=100
+      - KAFKA_TOPIC_NAME=message-topic
+      - KAFKA_BOOTSTRAP_ADDRESS=kafka:9092
+      - SCHEMA_REGISTRY_URL=http://schema-registry:8081
+
+networks:
+  app-tier:
+    driver: bridge
